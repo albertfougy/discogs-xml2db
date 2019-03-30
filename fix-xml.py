@@ -2,7 +2,7 @@ from __future__ import with_statement
 import re
 import sys
 import os
-from contextlib import nested
+from contextlib import ExitStack
 
 
 def clean(filename):
@@ -14,8 +14,13 @@ def clean(filename):
 	except:
 		print("Did not rename")
 
-	with nested(open(filename, "wb"), open(filename + ".old", "rb")) as (destination, source):
-
+    # contextlib.nested is deprecated
+	# with nested(open(filename, "wb"), open(filename + ".old", "rb")) as (destination, source):
+	filenames = [filename, filename + ".old"]
+	extensions = ["wb","rb"]
+	with ExitStack() as stack:
+		destination = [stack.enter_context(open(fname)) for fname in filenames]
+		source = [stack.enter_context(open(extension)) for extension in extensions]
 		counter = 0
 		for line in source:
 			rObj = re.search(ctrlregex, line)
@@ -25,6 +30,7 @@ def clean(filename):
 				newLine = re.sub(ctrlregex, '', line)
 				destination.write(newLine)
 			else:
+				files.write(line)
 				destination.write(line)
 
 	os.remove("%s.old" % filename)

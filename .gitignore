@@ -4,3 +4,6 @@ discogs_*_*.xml
 COUCH
 tmp
 .idea/
+.DS_Store
+
+venv/
